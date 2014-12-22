@@ -27,7 +27,14 @@ klass.class_eval do
       }
     })
 
-    ::Sass::Engine.new(data, options).render
+    engine = ::Sass::Engine.new(data, options)
+    css = engine.render
+
+    engine.dependencies.map do |dependency|
+      context.depend_on(dependency.options[:filename])
+    end
+
+    css
   rescue ::Sass::SyntaxError => e
     # Annotates exception message with parse line number
     context.__LINE__ = e.sass_backtrace.first[:line]
